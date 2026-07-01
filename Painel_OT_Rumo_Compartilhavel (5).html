@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Governança — Auditoria Cyber OT (Rumo)</title>
+<style>
+  :root{
+    --dark:#16232a;
+    --dark2:#1f3036;
+    --panel:#22343b;
+    --teal:#00897B;
+    --teal-light:#1AB6A4;
+    --teal-pale:#E0F2F1;
+    --bg:#F4F6F6;
+    --card:#FFFFFF;
+    --ink:#1c2b30;
+    --muted:#5b6e74;
+    --line:#E1E8E9;
+    --crit:#C0392B;
+    --alto:#E67E22;
+    --medio:#C9971C;
+    --baixo:#2980B9;
+    --verde:#1E8E5A;
+    --crit-bg:#FBE5E2;
+    --alto-bg:#FCEAD7;
+    --medio-bg:#FBF1D6;
+    --baixo-bg:#DCE9F5;
+    --verde-bg:#DDF1E6;
+    --gray-bg:#ECEFF1;
+    --font-head: Georgia, 'Times New Roman', serif;
+    --font-body: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);}
+  a{color:inherit;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky;top:0;z-index:50;background:var(--dark);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0.7rem 1.6rem;box-shadow:0 2px 10px rgba(0,0,0,0.15);
+  }
+  nav .brand{display:flex;align-items:center;gap:0.7rem;color:#fff;font-weight:700;font-size:0.95rem;letter-spacing:0.03em;}
+  nav .brand svg{width:20px;height:20px;flex:none;}
+  nav .brand-logo{height:22px;width:auto;flex:none;display:block;}
+  nav .brand-sep{color:#3E5358;font-weight:400;}
+  nav .brand span{font-size:0.82rem;}
+  @media(max-width:760px){ nav .brand-sep, nav .brand span{display:none;} }
+  nav .links{display:flex;gap:1.4rem;flex-wrap:wrap;}
+  nav .links .navlink{color:#AFC4C7;text-decoration:none;font-size:0.85rem;font-weight:600;padding:0.3rem 0;border-bottom:2px solid transparent;transition:color .15s, border-color .15s;cursor:pointer;user-select:none;}
+  nav .links .navlink:hover{color:#fff;border-color:var(--teal-light);}
+  nav .links .navlink.active{color:#fff;border-color:var(--teal-light);}
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    background:linear-gradient(155deg,var(--dark) 0%, var(--dark2) 60%, #203a3c 100%);
+    color:#fff;padding:3rem 1.6rem 2.6rem;position:relative;overflow:hidden;
+  }
+  header.hero::after{
+    content:"";position:absolute;right:-120px;top:-160px;width:420px;height:420px;border-radius:50%;
+    background:radial-gradient(circle, rgba(26,182,164,0.18), transparent 70%);
+  }
+  .hero-inner{position:relative;max-width:1180px;margin:0 auto;}
+  .eyebrow{color:var(--teal-light);font-size:0.78rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.8rem;display:flex;align-items:center;gap:0.5rem;}
+  h1.title{font-family:var(--font-head);font-size:2.3rem;margin:0 0 0.5rem;line-height:1.15;}
+  .subtitle{color:#C9D8DA;font-size:1.05rem;margin:0 0 1.3rem;max-width:640px;}
+  .meta-row{display:flex;flex-wrap:wrap;gap:1.6rem;font-size:0.85rem;color:#9FB4B8;}
+  .meta-row b{color:#fff;}
+  #live-clock{color:var(--teal-light);font-weight:700;}
+
+  /* ---------- SECTIONS ---------- */
+  section{max-width:1180px;margin:0 auto;padding:2.6rem 1.6rem;scroll-margin-top:64px;}
+  .section-head{margin-bottom:1.4rem;}
+  .section-head h2{font-family:var(--font-head);font-size:1.55rem;margin:0 0 0.3rem;color:var(--dark2);}
+  .section-head p{color:var(--muted);margin:0;font-size:0.92rem;max-width:680px;}
+
+  /* ---------- KPI CARDS ---------- */
+  .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.9rem;}
+  @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+  .kpi-card{background:var(--card);border-radius:12px;padding:1.3rem 1rem;text-align:center;box-shadow:0 2px 10px rgba(20,40,45,0.06);}
+  .kpi-card .val{font-family:var(--font-head);font-size:2.2rem;font-weight:700;color:var(--teal);line-height:1;}
+  .kpi-card .val.warn{color:var(--alto);}
+  .kpi-card .val.ok{color:var(--verde);}
+  .kpi-card .lbl{font-size:0.78rem;color:var(--muted);margin-top:0.5rem;}
+
+  .alert-banner{
+    margin-top:1rem;background:var(--teal-pale);border-radius:12px;padding:1.1rem 1.3rem;
+    display:flex;gap:0.9rem;align-items:flex-start;font-size:0.92rem;color:#234042;
+  }
+  .alert-banner svg{flex:none;width:22px;height:22px;color:var(--alto);margin-top:0.1rem;}
+  .alert-banner b{color:var(--dark2);}
+
+  /* ---------- CHARTS ---------- */
+  .chart-grid{display:grid;grid-template-columns:1fr 0.75fr 1fr 0.9fr;gap:1rem;}
+  @media(max-width:1100px){.chart-grid{grid-template-columns:1fr 1fr;}}
+  @media(max-width:640px){.chart-grid{grid-template-columns:1fr;}}
+  .chart-card{background:var(--card);border-radius:12px;padding:1.1rem 1.1rem 0.6rem;box-shadow:0 2px 10px rgba(20,40,45,0.06);}
+  .chart-card h3{font-size:0.92rem;margin:0 0 0.7rem;color:var(--dark2);}
+  .chart-card .wrap{position:relative;min-height:190px;}
+  .status-detalhe{display:flex;flex-direction:column;gap:0.5rem;padding:0.2rem 0;}
+  .sd-row{display:flex;align-items:center;gap:0.6rem;}
+  .sd-label{font-size:0.78rem;color:var(--ink);width:130px;flex:none;line-height:1.2;}
+  .sd-track{flex:1;background:#ECEFF1;border-radius:20px;height:10px;overflow:hidden;cursor:pointer;transition:opacity .15s;}
+  .sd-track:hover{opacity:0.78;}
+  .sd-fill{height:100%;border-radius:20px;}
+  .sd-val{font-size:0.8rem;font-weight:700;color:var(--ink);width:24px;text-align:right;flex:none;}
+
+  /* ---------- RISK CARDS ---------- */
+  .risk-list{display:flex;flex-direction:column;gap:0.8rem;}
+  .risk-card{background:var(--card);border-radius:12px;padding:1.1rem 1.3rem;display:flex;gap:1rem;box-shadow:0 2px 10px rgba(20,40,45,0.06);}
+  .risk-icon{flex:none;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+  .risk-icon svg{width:20px;height:20px;}
+  .risk-card h4{margin:0 0 0.3rem;font-size:1rem;color:var(--dark2);}
+  .risk-card p{margin:0;font-size:0.88rem;color:var(--muted);line-height:1.45;}
+
+  /* ---------- RESUMO TABLE ---------- */
+  .resumo-table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(20,40,45,0.06);font-size:0.86rem;}
+  .resumo-table th{background:var(--dark2);color:#fff;text-align:left;padding:0.7rem 0.8rem;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.04em;}
+  .resumo-table td{padding:0.65rem 0.8rem;border-top:1px solid var(--line);vertical-align:middle;}
+  .resumo-table tr:hover td{background:#FAFCFC;}
+  .badge{display:inline-block;padding:0.18rem 0.6rem;border-radius:20px;font-size:0.76rem;font-weight:700;}
+  .progress-track{background:#E7ECEC;border-radius:20px;height:8px;width:100%;overflow:hidden;}
+  .progress-fill{height:100%;border-radius:20px;background:var(--teal);}
+  .pct-cell{display:flex;align-items:center;gap:0.5rem;}
+  .pct-cell span{font-size:0.78rem;color:var(--muted);width:34px;text-align:right;flex:none;}
+
+  /* ---------- PLANO FILTERS + TABLE ---------- */
+  .filters{display:flex;flex-wrap:wrap;gap:0.7rem;margin-bottom:1.1rem;}
+  .filters input, .filters select{
+    font-family:var(--font-body);font-size:0.85rem;padding:0.55rem 0.8rem;border-radius:8px;
+    border:1px solid var(--line);background:#fff;color:var(--ink);
+  }
+  .filters input{flex:1 1 220px;min-width:200px;}
+  .filters select{flex:0 0 auto;}
+  .filters .count{margin-left:auto;align-self:center;font-size:0.82rem;color:var(--muted);}
+
+  .plano-list{display:flex;flex-direction:column;gap:0.7rem;}
+  .acao-card{background:var(--card);border-radius:12px;padding:0.95rem 1.2rem;box-shadow:0 2px 10px rgba(20,40,45,0.06);}
+  .acao-top{display:flex;flex-wrap:wrap;align-items:center;gap:0.55rem;margin-bottom:0.45rem;}
+  .acao-id{font-size:0.74rem;color:var(--muted);font-family:Consolas,monospace;}
+  .acao-titulo{font-size:0.78rem;color:var(--muted);}
+  .acao-desc{font-size:0.92rem;color:var(--ink);margin:0.25rem 0 0.4rem;line-height:1.4;}
+  .acao-entrega{font-size:0.82rem;color:var(--muted);margin:0 0 0.5rem;line-height:1.4;}
+  .acao-entrega b{color:#3c4d52;}
+  .acao-bottom{display:flex;flex-wrap:wrap;gap:1.2rem;font-size:0.78rem;color:var(--muted);align-items:center;}
+  .acao-bottom .comment{font-style:italic;color:#3c4d52;}
+  .no-results{text-align:center;color:var(--muted);padding:2rem;font-size:0.9rem;}
+
+  /* ---------- VENCIMENTOS 30/60/90 ---------- */
+  .venc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+  @media(max-width:900px){.venc-grid{grid-template-columns:1fr;}}
+  .venc-col{background:var(--card);border-radius:12px;box-shadow:0 2px 10px rgba(20,40,45,0.06);overflow:hidden;display:flex;flex-direction:column;}
+  .venc-head{padding:1.1rem 1.2rem;border-bottom:1px solid var(--line);}
+  .venc-head .n{font-family:var(--font-head);font-size:2rem;font-weight:700;line-height:1;}
+  .venc-head .l{font-size:0.82rem;color:var(--muted);margin-top:0.2rem;}
+  .venc-30 .n{color:var(--crit);}
+  .venc-60 .n{color:var(--alto);}
+  .venc-90 .n{color:var(--medio);}
+  .venc-items{padding:0.6rem 0.9rem 1rem;display:flex;flex-direction:column;gap:0.55rem;max-height:340px;overflow-y:auto;}
+  .venc-item{padding:0.6rem 0.7rem;border-radius:8px;background:#FAFCFC;border:1px solid var(--line);}
+  .venc-item .top{display:flex;justify-content:space-between;align-items:center;gap:0.5rem;margin-bottom:0.25rem;}
+  .venc-item .ttl{font-size:0.82rem;color:var(--ink);line-height:1.35;}
+  .venc-item .meta{font-size:0.72rem;color:var(--muted);margin-top:0.3rem;}
+  .venc-item .dias{font-size:0.74rem;font-weight:700;flex:none;white-space:nowrap;}
+  .venc-empty{padding:1.2rem;text-align:center;color:var(--muted);font-size:0.85rem;}
+
+  /* ---------- PONTOS FOCAIS ---------- */
+  .focal-layout{display:grid;grid-template-columns:1.3fr 1fr;gap:1.2rem;align-items:start;}
+  @media(max-width:900px){.focal-layout{grid-template-columns:1fr;}}
+  .focal-table td, .focal-table th{text-align:center;}
+  .focal-table td:first-child, .focal-table th:first-child{text-align:left;}
+  .focal-table tfoot td{font-weight:700;background:#F3F6F6;border-top:2px solid var(--line);}
+  .focal-chart-card{margin:0;}
+  .focal-pill{display:inline-block;min-width:26px;padding:0.12rem 0.5rem;border-radius:20px;font-weight:700;font-size:0.82rem;}
+  .focal-hi{background:var(--crit-bg);color:var(--crit);}
+  .focal-mid{background:var(--medio-bg);color:var(--medio);}
+  .focal-lo{background:var(--verde-bg);color:var(--verde);}
+
+  footer{text-align:center;padding:2rem 1.6rem 3rem;color:var(--muted);font-size:0.78rem;}
+
+  /* ---------- DRILL-DOWN PANEL ---------- */
+  #dd-overlay{
+    display:none;position:fixed;inset:0;z-index:200;
+  }
+  #dd-overlay.open{ display:flex; }
+  #dd-backdrop{
+    position:absolute;inset:0;background:rgba(22,35,42,0.45);
+    animation:fadeIn .18s ease;pointer-events:auto;
+  }
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  #dd-panel{
+    position:absolute;right:0;top:0;bottom:0;
+    width:min(680px,95vw);background:var(--bg);
+    display:flex;flex-direction:column;
+    box-shadow:-6px 0 32px rgba(0,0,0,0.18);
+    animation:slideIn .2s ease;
+    overflow:hidden;pointer-events:auto;z-index:1;
+  }
+  @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+  #dd-header{
+    background:var(--dark2);color:#fff;
+    padding:1.1rem 1.4rem;display:flex;align-items:center;gap:1rem;flex:none;
+    border-bottom:2px solid var(--teal);
+  }
+  #dd-back{
+    display:flex;align-items:center;gap:0.4rem;
+    background:rgba(255,255,255,0.12);border:none;color:#fff;
+    border-radius:7px;padding:0.4rem 0.8rem;cursor:pointer;
+    font-size:0.82rem;font-family:var(--font-body);font-weight:600;
+    transition:background .15s;flex:none;
+  }
+  #dd-back:hover{background:rgba(255,255,255,0.22);}
+  #dd-title{font-family:var(--font-head);font-size:1.15rem;line-height:1.2;flex:1;}
+  #dd-count{font-size:0.78rem;color:#AFC4C7;flex:none;}
+  #dd-body{flex:1;overflow-y:auto;padding:1rem 1.2rem 2rem;}
+  .dd-card{
+    background:var(--card);border-radius:10px;
+    padding:0.9rem 1.1rem;margin-bottom:0.7rem;
+    box-shadow:0 1px 6px rgba(20,40,45,0.06);
+    border-left:4px solid transparent;
+  }
+  .dd-card.sev-Crítico{border-color:var(--crit);}
+  .dd-card.sev-Alto{border-color:var(--alto);}
+  .dd-card.sev-Médio{border-color:var(--medio);}
+  .dd-card.sev-Baixo{border-color:var(--baixo);}
+  .dd-top{display:flex;flex-wrap:wrap;gap:0.45rem;align-items:center;margin-bottom:0.35rem;}
+  .dd-desc{font-size:0.91rem;color:var(--ink);line-height:1.4;margin-bottom:0.35rem;}
+  .dd-entrega{font-size:0.8rem;color:var(--muted);margin-bottom:0.4rem;line-height:1.35;}
+  .dd-entrega b{color:#3c4d52;}
+  .dd-meta{display:flex;flex-wrap:wrap;gap:0.9rem;font-size:0.77rem;color:var(--muted);}
+  .dd-comment{font-style:italic;color:#3c4d52;font-size:0.8rem;}
+  .dd-empty{text-align:center;color:var(--muted);padding:2rem 1rem;font-size:0.9rem;}
+
+  /* highlight de hover nas linhas de tabela clicáveis */
+  .resumo-table tbody tr[data-click], .focal-table tbody tr[data-click]{ cursor:pointer; }
+  .resumo-table tbody tr[data-click]:hover td,
+  .focal-table tbody tr[data-click]:hover td{background:#E8F5F3;}
+  .chart-clickable rect{ cursor:pointer; }
+  .chart-clickable rect:hover{ opacity:0.78; }
+  .chart-clickable circle{ cursor:pointer; }
+  .chart-clickable circle:hover{ opacity:0.78; }
+
+  .sev-Crítico{background:var(--crit-bg);color:var(--crit);}
+  .sev-Alto{background:var(--alto-bg);color:var(--alto);}
+  .sev-Médio{background:var(--medio-bg);color:var(--medio);}
+  .sev-Baixo{background:var(--baixo-bg);color:var(--baixo);}
+  .stat-andamento{background:var(--verde-bg);color:var(--verde);}
+  .stat-criada{background:var(--medio-bg);color:var(--medio);}
+  .stat-execucao{background:var(--baixo-bg);color:var(--baixo);}
+  .stat-sem{background:var(--gray-bg);color:#637076;}
+  .faixa-atrasado{background:var(--crit-bg);color:var(--crit);}
+  .faixa-menos45{background:var(--alto-bg);color:var(--alto);}
+  .faixa-de15a3m{background:var(--medio-bg);color:var(--medio);}
+  .faixa-de3a6m{background:var(--baixo-bg);color:var(--baixo);}
+  .faixa-mais6m{background:var(--verde-bg);color:var(--verde);}
+</style>
+</head>
+<body>
+
+<div id="dd-overlay">
+  <div id="dd-backdrop"></div>
+  <div id="dd-panel">
+    <div id="dd-header">
+      <button id="dd-back">← Voltar ao painel</button>
+      <div id="dd-title">Detalhe</div>
+      <div id="dd-count"></div>
+    </div>
+    <div id="dd-body"></div>
+  </div>
+</div>
+
+<nav>
+  <div class="brand">
+    <img src="data:image/png;base64,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" alt="Rumo" class="brand-logo">
+    <span class="brand-sep">|</span>
+    <span>GOVERNANÇA DE SEGURANÇA CIBERNÉTICA OT</span>
+  </div>
+  <div class="links">
+    <span class="navlink" data-target="visao">Visão Geral</span>
+    <span class="navlink" data-target="vencimentos">Vencimentos</span>
+    <span class="navlink" data-target="focais">Pontos Focais</span>
+    <span class="navlink" data-target="riscos">Riscos</span>
+    <span class="navlink" data-target="resumo">Resumo</span>
+    <span class="navlink" data-target="plano">Plano de Ação</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+      AUDITORIA DE CIBERSEGURANÇA OT — CICLO 2025
+    </div>
+    <h1 class="title">Painel de Governança</h1>
+    <p class="subtitle">Acompanhamento vivo do plano de ação da auditoria Cyber OT — visibilidade compartilhada para o time, sempre recalculado a partir da data de hoje.</p>
+    <div class="meta-row">
+      <span><b>Empresa:</b> RUMO</span>
+      <span><b>Apontamentos:</b> 8</span>
+      <span><b>Ações:</b> 26</span>
+      <span>Atualizado em <span id="live-clock"></span></span>
+    </div>
+  </div>
+</header>
+
+<section id="visao">
+  <div class="section-head">
+    <h2>O plano em números</h2>
+    <p>Indicadores recalculados a partir da data de hoje — recarregue a página para atualizar o prazo restante de cada ação.</p>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="val" id="kpi-apontamentos">–</div><div class="lbl">Apontamentos abertos</div></div>
+    <div class="kpi-card"><div class="val" id="kpi-acoes">–</div><div class="lbl">Ações em andamento</div></div>
+    <div class="kpi-card"><div class="val ok" id="kpi-atrasadas">–</div><div class="lbl">Ações atrasadas</div></div>
+    <div class="kpi-card"><div class="val warn" id="kpi-pct">–</div><div class="lbl">Ações com atualização registrada</div></div>
+    <div class="kpi-card"><div class="val warn" id="kpi-prazo">–</div><div class="lbl">Dias até o próximo prazo</div></div>
+  </div>
+  <div class="alert-banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.7 3.86a2 2 0 00-3.4 0z"/></svg>
+    <div id="alert-text">Calculando…</div>
+  </div>
+
+  <div class="chart-grid" style="margin-top:1.4rem;">
+    <div class="chart-card">
+      <h3>Ações por severidade</h3>
+      <div class="wrap" id="chartSeveridade"></div>
+    </div>
+    <div class="chart-card">
+      <h3>Status das atualizações</h3>
+      <div class="wrap" id="chartStatus"></div>
+    </div>
+    <div class="chart-card">
+      <h3>Ações por faixa de prazo</h3>
+      <div class="wrap" id="chartPrazo"></div>
+    </div>
+    <div class="chart-card">
+      <h3>Status geral detalhado</h3>
+      <div id="chartStatusDetalhe"></div>
+    </div>
+  </div>
+</section>
+
+<section id="vencimentos">
+  <div class="section-head">
+    <h2>O que vence nos próximos 30 / 60 / 90 dias</h2>
+    <p>Cada ação aparece em uma única janela (a mais próxima) — use para priorizar os próximos checkpoints. Ações já atrasadas não entram aqui (veja o KPI "Ações atrasadas").</p>
+  </div>
+  <div class="venc-grid" id="venc-grid"></div>
+</section>
+
+<section id="focais">
+  <div class="section-head">
+    <h2>Tarefas por ponto focal</h2>
+    <p>Quantidade de ações sob cada ponto focal, segmentada por severidade do apontamento.</p>
+  </div>
+  <div class="focal-layout">
+    <table class="resumo-table focal-table">
+      <thead><tr><th>Ponto Focal</th><th>Crítico</th><th>Alto</th><th>Médio</th><th>Baixo</th><th>Total</th></tr></thead>
+      <tbody id="focal-body"></tbody>
+      <tfoot><tr id="focal-total"></tr></tfoot>
+    </table>
+    <div class="chart-card focal-chart-card">
+      <h3>Status das tarefas por ponto focal</h3>
+      <div class="wrap" id="chartFocalStatus" style="min-height:220px;"></div>
+    </div>
+  </div>
+</section>
+
+<section id="riscos">
+  <div class="section-head">
+    <h2>Riscos de governança a endereçar</h2>
+    <p>Leituras automáticas a partir dos dados do plano — vale revisar antes do próximo checkpoint.</p>
+  </div>
+  <div class="risk-list">
+    <div class="risk-card">
+      <div class="risk-icon" style="background:var(--alto-bg);"><svg viewBox="0 0 24 24" fill="none" stroke="var(--alto)" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.7 3.86a2 2 0 00-3.4 0z"/></svg></div>
+      <div><h4>Cobertura de atualização ainda parcial (69%)</h4><p>8 das 26 ações continuam sem nenhuma evidência de progresso registrada. Já é uma melhora relevante frente a ciclos anteriores, mas vale cobrar essas pendências no próximo checkpoint.</p></div>
+    </div>
+    <div class="risk-card">
+      <div class="risk-icon" style="background:var(--teal-pale);"><svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+      <div><h4>Carga concentrada em um ponto focal</h4><p>Patrícia Horta responde por 7 das 26 ações (27% do plano) — quase o dobro da média entre os 6 pontos focais. Vale avaliar se a capacidade dela está sendo um gargalo.</p></div>
+    </div>
+    <div class="risk-card">
+      <div class="risk-icon" style="background:var(--crit-bg);"><svg viewBox="0 0 24 24" fill="none" stroke="var(--crit)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></div>
+      <div><h4>Accountability ainda concentrado na gerência</h4><p>Mesmo com a execução distribuída entre 6 pontos focais, Sílvio Hayashi segue como gerente responsável por 100% das 26 ações. Risco de continuidade caso haja indisponibilidade dele.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="resumo">
+  <div class="section-head">
+    <h2>Resumo por apontamento</h2>
+    <p>Visão consolidada dos 8 apontamentos da auditoria.</p>
+  </div>
+  <table class="resumo-table">
+    <thead><tr><th>#</th><th>Apontamento</th><th>Severidade</th><th>Ações</th><th style="width:160px;">% Atualização</th><th>Prazo mais próximo</th></tr></thead>
+    <tbody id="resumo-body"></tbody>
+  </table>
+</section>
+
+<section id="plano">
+  <div class="section-head">
+    <h2>Plano de ação detalhado</h2>
+    <p>Filtre por apontamento, severidade, status, mês/ano de vencimento, ou busque por palavra-chave na descrição.</p>
+  </div>
+  <div class="filters">
+    <input type="text" id="f-search" placeholder="Buscar por palavra-chave (ação, entregável, ID)...">
+    <select id="f-apontamento"><option value="">Todos os apontamentos</option></select>
+    <select id="f-severidade"><option value="">Todas as severidades</option></select>
+    <select id="f-status"><option value="">Todos os status</option></select>
+    <select id="f-focal"><option value="">Todos os pontos focais</option></select>
+    <select id="f-mes"><option value="">Todos os meses</option></select>
+    <select id="f-ano"><option value="">Todos os anos</option></select>
+    <span class="count" id="result-count"></span>
+  </div>
+  <div class="plano-list" id="plano-list"></div>
+</section>
+
+<footer>
+  Painel gerado a partir do plano de ação da auditoria Cyber OT 2025 — RUMO. Para edição completa, use a planilha de governança.
+</footer>
+
+<script>
+const DATA = [{"apontamento_id": "RISSUE_000005", "apontamento_titulo": "1. Fragilidades na arquitetura e fluxos de comunicação da rede OT", "severidade": "Crítico", "acao_id": "RTSK_000014", "acao_desc": "A) Estruturar abordagem progressiva para fortalecimento da governança e da segurança em OT contemplando consolidação da arquitetura de referência e dos fluxos autorizados entre domínios, com diretrizes de segmentação IT/OT.", "entregavel": "Processo formalizado de gestão e consolidação do inventário de ativos OT, definindo escopo, fontes de dados, papéis e responsabilidades, critérios mínimos de informação e periodicidade de execução.", "comentario": null, "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Patrícia Horta", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000005", "apontamento_titulo": "1. Fragilidades na arquitetura e fluxos de comunicação da rede OT", "severidade": "Crítico", "acao_id": "RTSK_000015", "acao_desc": "B) Realizar a coleta dos dados disponíveis de ativos OT a partir das ferramentas e controles existentes (ex.: Nozomi), garantindo identificação única do ativo, tipo/categoria, localização e criticidade operacional mínima.", "entregavel": "Inventário inicial consolidado de ativos OT, estruturado com os dados coletados das ferramentas e controles existentes.", "comentario": "Nozomis estabelecidos , estamos criando os fluxo.", "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Patrícia Horta", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000005", "apontamento_titulo": "1. Fragilidades na arquitetura e fluxos de comunicação da rede OT", "severidade": "Crítico", "acao_id": "RTSK_000016", "acao_desc": "C) Elaborar documentação formal da arquitetura OT consolidada segundo o Modelo Purdue.", "entregavel": "documentação arquitetural consolidada do ambiente OT, estruturada conforme o Modelo Purdue, com definição de níveis, zonas, conduítes, interconexões e ativos/sistemas associados.", "comentario": "Projeto de Segmentação IT/OT ", "data_registro": "2026-04-30", "prazo_previsto": "2027-07-31", "ponto_focal": "Sílvio Hayashi", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000005", "apontamento_titulo": "1. Fragilidades na arquitetura e fluxos de comunicação da rede OT", "severidade": "Crítico", "acao_id": "RTSK_000017", "acao_desc": "D) Preparar matriz de zonas e conduítes entre domínios IT e OT.", "entregavel": "inventário formal das zonas e conduítes existentes entre IT e OT, incluindo finalidade, protocolos, portas, responsáveis, justificativa de negócio e status de autorização.", "comentario": "Projeto de Segmentação IT/OT ", "data_registro": "2026-04-30", "prazo_previsto": "2027-07-31", "ponto_focal": "Sílvio Hayashi", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000005", "apontamento_titulo": "1. Fragilidades na arquitetura e fluxos de comunicação da rede OT", "severidade": "Crítico", "acao_id": "RTSK_000018", "acao_desc": "E) Elaborar relação de fluxos autorizados entre domínios.", "entregavel": "Catálogo dos fluxos autorizados entre os domínios IT e OT, com origem, destino, serviço, criticidade, base de autorização e periodicidade de revisão.", "comentario": "Estamos estruturando o fluxo de ativos após demostração para o Silvio.", "data_registro": "2026-04-30", "prazo_previsto": "2027-07-31", "ponto_focal": "Cristiano Portugal", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000005", "apontamento_titulo": "1. Fragilidades na arquitetura e fluxos de comunicação da rede OT", "severidade": "Crítico", "acao_id": "RTSK_000019", "acao_desc": "F) Definir diretriz formal de segmentação IT/OT.", "entregavel": "norma, padrão ou procedimento corporativo definindo critérios de segmentação entre IT e OT, incluindo princípios de segregação, exceções permitidas, requisitos mínimos de controle e responsabilidades.", "comentario": "Criado e validado pelo Silvio, restando a publicação ", "data_registro": "2026-04-30", "prazo_previsto": "2027-07-31", "ponto_focal": "Cristiano Portugal", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000005", "apontamento_titulo": "1. Fragilidades na arquitetura e fluxos de comunicação da rede OT", "severidade": "Crítico", "acao_id": "RTSK_000020", "acao_desc": "G) Definir plano de microsegmentação.", "entregavel": "plano técnico e executivo para implantação progressiva de microsegmentação no ambiente OT e nas interfaces com IT, priorizado por criticidade e risco operacional.", "comentario": "Projeto de Segmentação IT/OT ", "data_registro": "2026-04-30", "prazo_previsto": "2027-07-31", "ponto_focal": "Sílvio Hayashi", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000006", "apontamento_titulo": "2. Ausência de plano de continuidade e análise de impactos no negócio (BIA) para ambientes OT", "severidade": "Alto", "acao_id": "RTSK_000022", "acao_desc": "B) Registrar a abordagem de contingência nos terminais.", "entregavel": "Registro de plano de contingência dos terminais.", "comentario": null, "data_registro": "2026-04-30", "prazo_previsto": "2027-07-31", "ponto_focal": "Patrícia Horta", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000006", "apontamento_titulo": "2. Ausência de plano de continuidade e análise de impactos no negócio (BIA) para ambientes OT", "severidade": "Alto", "acao_id": "RTSK_000023", "acao_desc": "C) Formalizar abordagem de BIA OT mínimo viável incluindo dados da ação A e B.", "entregavel": "Documento formal de BIA OT Mínimo Viável.", "comentario": null, "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Sílvio Hayashi", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000007", "apontamento_titulo": "3. Inventário de ativos OT incompleto/descentralizado e governança insuficiente de ativos de OT", "severidade": "Médio", "acao_id": "RTSK_000024", "acao_desc": "A) Implantar processo formal de gestão e consolidação do inventário OT.", "entregavel": "Documento formal do processo de gestão e consolidação do inventário de ativos OT.", "comentario": "Planilha pronta validada pelo Silvio. Estamos populando com as informações.", "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Bruno Kobzinski", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000007", "apontamento_titulo": "3. Inventário de ativos OT incompleto/descentralizado e governança insuficiente de ativos de OT", "severidade": "Médio", "acao_id": "RTSK_000025", "acao_desc": "B) Preparar base estruturada de dados de ativos OT.", "entregavel": NaN, "comentario": "Planilha pronta validada pelo Silvio. Estamos populando com as informações.", "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Bruno Kobzinski", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000007", "apontamento_titulo": "3. Inventário de ativos OT incompleto/descentralizado e governança insuficiente de ativos de OT", "severidade": "Médio", "acao_id": "RTSK_000026", "acao_desc": "C) Consolidar inventário OT/IT com avaliação de suficiência e qualidade.", "entregavel": NaN, "comentario": "Estamos no processo de consolidação da planilha. Aguardando apenas os dados do Vitor Mandrini", "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Bruno Kobzinski", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000007", "apontamento_titulo": "3. Inventário de ativos OT incompleto/descentralizado e governança insuficiente de ativos de OT", "severidade": "Médio", "acao_id": "RTSK_000027", "acao_desc": "D) Estabelecer política formal de gestão do ciclo de vida de ativos e serviços OT.", "entregavel": "Política formalmente aprovada para gestão do ciclo de vida de hardware, software e serviços em OT", "comentario": "Criada falta publicar", "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Bruno Kobzinski", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000007", "apontamento_titulo": "3. Inventário de ativos OT incompleto/descentralizado e governança insuficiente de ativos de OT", "severidade": "Médio", "acao_id": "RTSK_000028", "acao_desc": "E) Estabelecer procedimento formal para validação de autenticidade e integridade antes da implantação.", "entregavel": "Procedimento documentado e aprovado para validação de autenticidade, origem, integridade e segurança mínima antes da implantação de hardware, software e serviços em OT.", "comentario": "Criada falta publicar, conforme e-mail de 13 de março. ", "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Cristiano Portugal", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000007", "apontamento_titulo": "3. Inventário de ativos OT incompleto/descentralizado e governança insuficiente de ativos de OT", "severidade": "Médio", "acao_id": "RTSK_000029", "acao_desc": "F) Estabelecer procedimento padronizado de configuração de ativos OT.", "entregavel": "Procedimento formal de configuração de ativos OT, com definição de padrões mínimos e controles de rastreabilidade.", "comentario": "Criada falta publicar, conforme e-mail de 13 de março. ", "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Cristiano Portugal", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000007", "apontamento_titulo": "3. Inventário de ativos OT incompleto/descentralizado e governança insuficiente de ativos de OT", "severidade": "Médio", "acao_id": "RTSK_000030", "acao_desc": "G) Definir baselines de configuração e hardening por tipo de ativo OT.", "entregavel": "Conjunto formal de baselines de configuração e hardening para os principais tipos de ativos OT.", "comentario": "Criado o baseline do SARHM , demostrado para o Silvio. ", "data_registro": "2026-04-30", "prazo_previsto": "2027-07-31", "ponto_focal": "Bruno Kobzinski", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000007", "apontamento_titulo": "3. Inventário de ativos OT incompleto/descentralizado e governança insuficiente de ativos de OT", "severidade": "Médio", "acao_id": "RTSK_000031", "acao_desc": "H) Estabelecer processo formal de gestão de mudanças de configuração em OT.", "entregavel": "Processo documentado para controle de alterações em hardware, software, firmware e parâmetros de configuração no ambiente OT.", "comentario": "Estamos criando o baseline das house. ", "data_registro": "2026-04-30", "prazo_previsto": "2027-07-31", "ponto_focal": "Cristiano Portugal", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000008", "apontamento_titulo": "4. Ausência de plano estratégico para segurança cibernética em OT", "severidade": "Médio", "acao_id": "RTSK_000033", "acao_desc": "B) Preparar Bridge Documents de OT consolidados e alinhados ao Plano Estratégico.", "entregavel": "documentos consolidados, alinhados ao modelo Purdue,à IEC 62443 e às diretrizes corporativas Cosan, servindo como referência técnica e operacional para os ambientes.", "comentario": "Criada falta publicar , já foi revisado pelo Silvio. Conforme e-mail de 20/04", "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Sílvio Hayashi", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000009", "apontamento_titulo": "5. Ausência de governança estruturada e processo formal de melhoria contínua em OT", "severidade": "Médio", "acao_id": "RTSK_000034", "acao_desc": "A) Estruturar processo de melhoria contínua para segurança cibernética em ambientes de OT, com governança mínima, critérios de acompanhamento e ciclos periódicos de revisão, alinhado ao NIST CSF 2.0 e às normas ISA/IEC 62443.", "entregavel": "Processo documentado de melhoria contínua para segurança OT, incluindo definição de responsabilidades, critérios de acompanhamento e ciclos de revisão.", "comentario": "Criada falta publicar , já foi revisado pelo Silvio. Conforme e-mail de 20/04", "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Patrícia Horta", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000009", "apontamento_titulo": "5. Ausência de governança estruturada e processo formal de melhoria contínua em OT", "severidade": "Médio", "acao_id": "RTSK_000035", "acao_desc": "B) Evoluir progressivamente o fluxo de gestão de vulnerabilidades em OT, utilizando fontes como a plataforma Nozomi e promovendo sua integração gradual ao processo corporativo, conforme criticidade dos ativos e nível de maturidade do ambiente.", "entregavel": "Fluxo estruturado para acompanhamento e evolução da gestão de vulnerabilidades em OT integrado ao processo corporativo.", "comentario": "Em andamento", "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Patrícia Horta", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000010", "apontamento_titulo": "6. Ausência de governança regulatória para ambientes OT", "severidade": "Baixo", "acao_id": "RTSK_000036", "acao_desc": "A) Consolidar a governança regulatória aplicável aos ambientes de OT por meio de processo mínimo para identificação, registro e monitoramento contínuo de requisitos legais e normativos, promovendo integração entre áreas técnicas e funções de governança e incorporando as diretrizes aos artefatos do programa de segurança OT.", "entregavel": "Processo documentado de gestão de requisitos regulatórios aplicáveis a OT.", "comentario": null, "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Marianna Rosa", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000010", "apontamento_titulo": "6. Ausência de governança regulatória para ambientes OT", "severidade": "Baixo", "acao_id": "RTSK_000037", "acao_desc": "B) Estabelecer fluxo integrado entre jurídico, compliance e engenharia OT para monitoramento de atualizações regulatórias e alinhamento com frameworks reconhecidos, garantindo atualização sistemática das práticas de segurança.", "entregavel": "Fluxo implementado para monitoramento e atualização periódica dos requisitos regulatórios de OT.", "comentario": null, "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Marianna Rosa", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000011", "apontamento_titulo": "7. Ausência de programa estruturado de conscientização e treinamento em cybersecurity para OT", "severidade": "Baixo", "acao_id": "RTSK_000038", "acao_desc": "A) Estruturar e implementar um programa formal de conscientização e treinamento em segurança cibernética específico para ambientes de Tecnologia Operacional (OT), alinhado ao NIST CSF 2.0 (PR.AT-01), contemplando riscos, práticas de segurança e responsabilidades das equipes que operam ou mantêm sistemas OT.", "entregavel": "Programa de treinamento e conscientização em segurança para OT documentado, com definição de conteúdos, público-alvo, periodicidade e responsabilidades.", "comentario": null, "data_registro": "2026-04-30", "prazo_previsto": "2026-07-31", "ponto_focal": "Marcus Pinheiro", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000011", "apontamento_titulo": "7. Ausência de programa estruturado de conscientização e treinamento em cybersecurity para OT", "severidade": "Baixo", "acao_id": "RTSK_000039", "acao_desc": "B) Implementar trilhas de treinamento e exercícios simulados voltados às equipes envolvidas com ambientes OT, incluindo capacitações técnicas e ações periódicas de conscientização para fortalecimento da cultura de segurança.", "entregavel": "Plano de capacitação implementado, com registro das atividades de treinamento realizadas e exercícios simulados para equipes críticas.", "comentario": null, "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Marcus Pinheiro", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000012", "apontamento_titulo": "8. Ausência de fluxo formal integrado entre Nozomi e gestão de vulnerabilidades", "severidade": "Baixo", "acao_id": "RTSK_000040", "acao_desc": "A) Estruturar e formalizar o processo de gestão de vulnerabilidades em ambientes OT, alinhado ao NIST CSF 2.0 (ID.RA-01), contemplando o uso da plataforma Nozomi e a integração com o CMDB corporativo (ServiceNow), garantindo correlação entre vulnerabilidades, ativos e planos de mitigação.", "entregavel": "Processo documentado de gestão de vulnerabilidades OT, com definição de fluxos, papéis e critérios de priorização.", "comentario": null, "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Patrícia Horta", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}, {"apontamento_id": "RISSUE_000012", "apontamento_titulo": "8. Ausência de fluxo formal integrado entre Nozomi e gestão de vulnerabilidades", "severidade": "Baixo", "acao_id": "RTSK_000041", "acao_desc": "B) Implementar integração ou fluxo estruturado entre Nozomi e ServiceNow para consolidar vulnerabilidades identificadas e vinculá-las aos ativos e às ações de mitigação.", "entregavel": "Fluxo implementado para registro, correlação e acompanhamento das vulnerabilidades OT.", "comentario": "Decidido que iremos controlar pela planilha consolidada. Foi dado como encerrado acordado em agenda. ", "data_registro": "2026-04-30", "prazo_previsto": "2026-12-31", "ponto_focal": "Patrícia Horta", "gerente_resp": "Sílvio Hayashi", "diretor": "Marco Andriola", "vp": "Cristiano Brasil"}];
+
+const SEV_ORDER = {"Crítico":0,"Alto":1,"Médio":2,"Baixo":3};
+const SEV_COLOR = {"Crítico":"#C0392B","Alto":"#E67E22","Médio":"#C9971C","Baixo":"#2980B9"};
+
+function parseDate(s){ if(!s) return null; const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+
+function diasRestantes(prazoStr){
+  const p = parseDate(prazoStr);
+  if(!p) return null;
+  return Math.round((p - TODAY) / 86400000);
+}
+const FAIXA_DEFS = [
+  { key:"Atrasado",          slug:"atrasado", test:d=> d<0 },
+  { key:"Menos de 45 dias",  slug:"menos45",  test:d=> d>=0 && d<=45 },
+  { key:"De 1,5 a 3 meses",  slug:"de15a3m",  test:d=> d>45 && d<=90 },
+  { key:"De 3 a 6 meses",    slug:"de3a6m",   test:d=> d>90 && d<=180 },
+  { key:"Mais de 6 meses",   slug:"mais6m",   test:d=> d>180 },
+];
+function faixaPrazo(dias){
+  if(dias === null) return {label:"—", slug:""};
+  const f = FAIXA_DEFS.find(f=>f.test(dias));
+  return {label:f.key, slug:f.slug};
+}
+function statusSimplificado(comentario){
+  if(!comentario) return {label:"Sem atualização", cls:"stat-sem"};
+  const c = comentario.toLowerCase();
+  if(c.includes("andamento")) return {label:"Em andamento", cls:"stat-andamento"};
+  if(c.includes("criada")) return {label:"Criada, aguardando publicação", cls:"stat-criada"};
+  return {label:"Em execução (ver nota)", cls:"stat-execucao"};
+}
+function fmtDate(s){
+  const d = parseDate(s); if(!d) return "—";
+  return d.toLocaleDateString("pt-BR");
+}
+
+// enrich data
+DATA.forEach(d=>{
+  d.dias = diasRestantes(d.prazo_previsto);
+  const f = faixaPrazo(d.dias);
+  d.faixa = f.label;
+  d.faixaSlug = f.slug;
+  d.status = statusSimplificado(d.comentario);
+});
+
+document.getElementById("live-clock").textContent = TODAY.toLocaleDateString("pt-BR");
+
+// ---------- KPIs ----------
+const apontamentosUnicos = [...new Set(DATA.map(d=>d.apontamento_id))];
+const totalAcoes = DATA.length;
+const comAtualizacao = DATA.filter(d=>d.comentario).length;
+const atrasadas = DATA.filter(d=>d.dias !== null && d.dias < 0).length;
+const proximoPrazo = Math.min(...DATA.map(d=>d.dias).filter(d=>d!==null));
+const acaoProxima = DATA.find(d=>d.dias === proximoPrazo);
+
+document.getElementById("kpi-apontamentos").textContent = apontamentosUnicos.length;
+document.getElementById("kpi-acoes").textContent = totalAcoes;
+document.getElementById("kpi-atrasadas").textContent = atrasadas;
+document.getElementById("kpi-atrasadas").className = "val " + (atrasadas>0 ? "warn":"ok");
+document.getElementById("kpi-pct").textContent = Math.round(100*comAtualizacao/totalAcoes) + "%";
+document.getElementById("kpi-prazo").textContent = proximoPrazo;
+
+document.getElementById("alert-text").innerHTML =
+  "<b>Atenção:</b> o prazo mais próximo do plano vence em " + fmtDate(acaoProxima.prazo_previsto) +
+  " (faltam " + proximoPrazo + " dias) — apontamento <b>" + acaoProxima.apontamento_titulo + "</b>.";
+
+// ---------- Helpers de gráfico SVG (sem dependências externas) ----------
+function barChart(containerId, labels, values, colors){
+  const el = document.getElementById(containerId);
+  const w = el.clientWidth || 320, h = 190;
+  const padL = 28, padB = 34, padT = 14, padR = 10;
+  const plotW = w - padL - padR, plotH = h - padT - padB;
+  const maxVal = Math.max(1, ...values);
+  const niceMax = Math.ceil(maxVal*1.15) || 1;
+  const n = labels.length;
+  const gap = 0.42;
+  const slot = plotW / n;
+  const barW = slot * (1-gap);
+  let bars = "", labelsSvg = "", gridSvg = "";
+  const gridLines = 4;
+  for(let i=0;i<=gridLines;i++){
+    const y = padT + plotH - (plotH*i/gridLines);
+    const val = Math.round(niceMax*i/gridLines);
+    gridSvg += `<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="#EEF2F2" stroke-width="1"/>`;
+    gridSvg += `<text x="${padL-6}" y="${y+3}" text-anchor="end" font-size="10" fill="#5b6e74">${val}</text>`;
+  }
+  values.forEach((v,i)=>{
+    const bh = plotH * (v/niceMax);
+    const x = padL + slot*i + (slot-barW)/2;
+    const y = padT + plotH - bh;
+    bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" rx="5" fill="${colors[i]}"/>`;
+    bars += `<text x="${(x+barW/2).toFixed(1)}" y="${(y-6).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#1c2b30">${v}</text>`;
+    const labelLines = String(labels[i]).split("\n");
+    labelLines.forEach((ln,li)=>{
+      labelsSvg += `<text x="${(x+barW/2).toFixed(1)}" y="${(h-padB+14+li*12).toFixed(1)}" text-anchor="middle" font-size="10.5" fill="#5b6e74">${ln}</text>`;
+    });
+  });
+  el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="100%" height="100%">${gridSvg}${bars}${labelsSvg}</svg>`;
+}
+
+function donutChart(containerId, labels, values, colors){
+  const el = document.getElementById(containerId);
+  const w = el.clientWidth || 320, h = 190;
+  const total = values.reduce((a,b)=>a+b,0) || 1;
+  const cx = w/2, cy = (h-46)/2 + 6, r = Math.min(cx,cy) - 10, stroke = r*0.42;
+  const circ = 2*Math.PI*r;
+  let offset = 0, segs = "";
+  values.forEach((v,i)=>{
+    const frac = v/total;
+    const len = frac*circ;
+    segs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${colors[i]}" stroke-width="${stroke}"
+      stroke-dasharray="${len.toFixed(2)} ${(circ-len).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}"
+      transform="rotate(-90 ${cx} ${cy})"/>`;
+    offset += len;
+  });
+  const pctMain = Math.round(100*values[0]/total);
+  let legend = `<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:0.6rem 1rem;margin-top:0.4rem;">`;
+  labels.forEach((lab,i)=>{
+    legend += `<span style="font-size:0.72rem;color:#5b6e74;display:flex;align-items:center;gap:0.35rem;">
+      <span style="width:9px;height:9px;border-radius:50%;background:${colors[i]};display:inline-block;"></span>${lab} (${values[i]})</span>`;
+  });
+  legend += `</div>`;
+  el.innerHTML = `<svg viewBox="0 0 ${w} ${h-40}" width="100%" height="${h-40}">
+      ${segs}
+      <text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="22" font-weight="700" fill="#1c2b30">${pctMain}%</text>
+      <text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="10" fill="#5b6e74">atualizado</text>
+    </svg>${legend}`;
+}
+
+function barChartH(containerId, labels, values, color){
+  const el = document.getElementById(containerId);
+  const w = el.clientWidth || 320;
+  const rowH = 30, padTop = 6, padBottom = 6;
+  const h = labels.length * rowH + padTop + padBottom;
+  const labelW = 118, padR = 30;
+  const plotW = Math.max(60, w - labelW - padR);
+  const maxVal = Math.max(1, ...values);
+  let bars = "";
+  values.forEach((v,i)=>{
+    const y = padTop + i*rowH;
+    const bw = plotW * (v/maxVal);
+    bars += `<text x="${labelW-8}" y="${(y+rowH/2+4).toFixed(1)}" text-anchor="end" font-size="11.5" fill="#37474F">${labels[i]}</text>`;
+    bars += `<rect x="${labelW}" y="${(y+5).toFixed(1)}" width="${bw.toFixed(1)}" height="${rowH-10}" rx="5" fill="${color}"/>`;
+    bars += `<text x="${(labelW+bw+8).toFixed(1)}" y="${(y+rowH/2+4).toFixed(1)}" font-size="12" font-weight="700" fill="#1c2b30">${v}</text>`;
+  });
+  el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}">${bars}</svg>`;
+}
+
+function barChartHStacked(containerId, labels, series){
+  const el = document.getElementById(containerId);
+  const w = el.clientWidth || 320;
+  const rowH = 38, padTop = 8, padBottom = 36;
+  const h = labels.length * rowH + padTop + padBottom;
+  const labelW = 135, padR = 10;
+  const plotW = Math.max(60, w - labelW - padR);
+  const totals = labels.map((_,i) => series.reduce((s,ser)=>s+ser.values[i],0));
+  const maxVal = Math.max(1, ...totals);
+  let bars = "";
+  labels.forEach((lbl,i)=>{
+    const y = padTop + i*rowH;
+    bars += `<text x="${labelW-8}" y="${(y+rowH/2+5).toFixed(1)}" text-anchor="end" font-size="13" fill="#37474F">${lbl}</text>`;
+    let xOff = labelW;
+    series.forEach(ser=>{
+      const v = ser.values[i];
+      if(v===0) return;
+      const bw = plotW*(v/maxVal);
+      bars += `<rect x="${xOff.toFixed(1)}" y="${(y+6).toFixed(1)}" width="${bw.toFixed(1)}" height="${rowH-12}" fill="${ser.color}"/>`;
+      if(bw>22) bars += `<text x="${(xOff+bw/2).toFixed(1)}" y="${(y+rowH/2+5).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">${v}</text>`;
+      xOff += bw;
+    });
+    bars += `<text x="${(xOff+8).toFixed(1)}" y="${(y+rowH/2+5).toFixed(1)}" font-size="13" font-weight="700" fill="#37474F">${totals[i]}</text>`;
+  });
+  // legenda
+  const legY = padTop + labels.length*rowH + 8;
+  const legItemW = Math.floor(plotW/series.length);
+  series.forEach((ser,i)=>{
+    const lx = labelW + i*legItemW;
+    bars += `<rect x="${lx}" y="${legY}" width="11" height="11" rx="2" fill="${ser.color}"/>`;
+    bars += `<text x="${lx+16}" y="${legY+10}" font-size="11.5" fill="#5b6e74">${ser.label}</text>`;
+  });
+  el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}">${bars}</svg>`;
+}
+
+const sevCounts = {};
+DATA.forEach(d=>{
+  sevCounts[d.severidade] = (sevCounts[d.severidade]||0) + 1;
+});
+const sevLabels = ["Crítico","Alto","Médio","Baixo"].filter(s=>sevCounts[s]);
+barChart("chartSeveridade", sevLabels, sevLabels.map(s=>sevCounts[s]||0), sevLabels.map(s=>SEV_COLOR[s]));
+
+const statusCounts = {"Em andamento":0,"Criada, aguardando publicação":0,"Em execução (ver nota)":0,"Sem atualização":0};
+DATA.forEach(d=> statusCounts[d.status.label]++ );
+donutChart("chartStatus",
+  ["Com atualização","Sem atualização"],
+  [statusCounts["Em andamento"]+statusCounts["Criada, aguardando publicação"]+statusCounts["Em execução (ver nota)"], statusCounts["Sem atualização"]],
+  ["#1AB6A4","#D7DEDF"]);
+
+const faixaOrder = ["Atrasado","Menos de\n45 dias","De 1,5 a\n3 meses","De 3 a\n6 meses","Mais de\n6 meses"];
+const faixaKeys = FAIXA_DEFS.map(f=>f.key);
+const faixaCounts = {}; faixaKeys.forEach(f=>faixaCounts[f]=0);
+DATA.forEach(d=> faixaCounts[d.faixa]++ );
+barChart("chartPrazo", faixaOrder, faixaKeys.map(f=>faixaCounts[f]), ["#C0392B","#E67E22","#C9971C","#2980B9","#1E8E5A"]);
+
+// ---------- Status geral detalhado ----------
+{
+  const statusDef = [
+    { label:"Em andamento",               key:"andamento",        color:"#1E8E5A", testFn: d=>!!d.comentario && d.comentario.toLowerCase().includes("andamento") },
+    { label:"Criada, aguardando publicação", key:"criada",         color:"#C9971C", testFn: d=>!!d.comentario && d.comentario.toLowerCase().includes("criada") },
+    { label:"Em execução (ver nota)",      key:"execucao",        color:"#2980B9", testFn: d=>!!d.comentario && !d.comentario.toLowerCase().includes("andamento") && !d.comentario.toLowerCase().includes("criada") },
+    { label:"Sem atualização",             key:"sem",             color:"#B0BEC5", testFn: d=>!d.comentario },
+  ];
+  const total = DATA.length;
+  const container = document.getElementById("chartStatusDetalhe");
+  const wrap = document.createElement("div");
+  wrap.className = "status-detalhe";
+  statusDef.forEach(def=>{
+    const count = DATA.filter(def.testFn).length;
+    const pct = Math.round(100*count/total);
+    const row = document.createElement("div");
+    row.className = "sd-row";
+    row.innerHTML = `
+      <span class="sd-label">${def.label}</span>
+      <div class="sd-track" title="${count} ações (${pct}%)">
+        <div class="sd-fill" style="width:${pct}%;background:${def.color};"></div>
+      </div>
+      <span class="sd-val">${count}</span>
+    `;
+    row.querySelector(".sd-track").addEventListener("click", ()=>{
+      openDrilldown(def.label, DATA.filter(def.testFn));
+    });
+    wrap.appendChild(row);
+  });
+  // linha de total
+  const totRow = document.createElement("div");
+  totRow.style.cssText = "margin-top:0.5rem;padding-top:0.5rem;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:0.8rem;";
+  totRow.innerHTML = `<span style="color:var(--muted)">Total de ações</span><b>${total}</b>`;
+  wrap.appendChild(totRow);
+  container.appendChild(wrap);
+}
+
+// ---------- Vencimentos 30/60/90 dias ----------
+const vencGrid = document.getElementById("venc-grid");
+const janelas = [
+  { min:0,  max:30, cls:"venc-30", label:"até 30 dias" },
+  { min:31, max:60, cls:"venc-60", label:"entre 31 e 60 dias" },
+  { min:61, max:90, cls:"venc-90", label:"entre 61 e 90 dias" },
+];
+janelas.forEach(j=>{
+  const itens = DATA.filter(d=> d.dias !== null && d.dias >= j.min && d.dias <= j.max)
+                     .sort((a,b)=>a.dias-b.dias);
+  const col = document.createElement("div");
+  col.className = "venc-col";
+  let itemsHtml = "";
+  if(itens.length===0){
+    itemsHtml = '<div class="venc-empty">Nenhuma ação vence ' + j.label + '.</div>';
+  }else{
+    itens.forEach(d=>{
+      itemsHtml += `
+        <div class="venc-item">
+          <div class="top">
+            <span class="badge sev-${d.severidade}">${d.severidade}</span>
+            <span class="dias" style="color:${d.dias<=30 ? 'var(--crit)' : (d.dias<=60 ? 'var(--alto)':'var(--medio)')}">${d.dias} dia${d.dias===1?'':'s'}</span>
+          </div>
+          <div class="ttl">${d.acao_desc}</div>
+          <div class="meta">${d.apontamento_titulo} · ${d.acao_id} · vence em ${fmtDate(d.prazo_previsto)}</div>
+        </div>`;
+    });
+  }
+  col.innerHTML = `
+    <div class="venc-head ${j.cls}">
+      <div class="n">${itens.length}</div>
+      <div class="l">${itens.length===1 ? 'ação' : 'ações'} vencendo ${j.label}</div>
+    </div>
+    <div class="venc-items">${itemsHtml}</div>
+  `;
+  vencGrid.appendChild(col);
+});
+
+// ---------- Tarefas por Ponto Focal ----------
+const focais = [...new Set(DATA.map(d=>d.ponto_focal))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+const focalBody = document.getElementById("focal-body");
+const focalTotals = [];
+function pillClass(n){ if(n>=7) return "focal-hi"; if(n>=4) return "focal-mid"; return "focal-lo"; }
+
+const STATUS_KEYS = ["andamento","Criada","execução","Sem atualização"];
+const STATUS_LABELS = ["Em andamento","Criada, aguardando publicação","Em execução (ver nota)","Sem atualização"];
+function getStatusKey(d){
+  if(!d.comentario) return "Sem atualização";
+  const c = d.comentario.toLowerCase();
+  if(c.includes("andamento")) return "andamento";
+  if(c.includes("criada")) return "Criada";
+  return "execução";
+}
+
+focais.forEach(pf=>{
+  const rows = DATA.filter(d=>d.ponto_focal===pf);
+  const counts = {"Crítico":0,"Alto":0,"Médio":0,"Baixo":0};
+  const statCounts = {"andamento":0,"Criada":0,"execução":0,"Sem atualização":0};
+  rows.forEach(r=>{
+    counts[r.severidade]++;
+    statCounts[getStatusKey(r)]++;
+  });
+  const total = rows.length;
+  focalTotals.push({ pf, total, statCounts });
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${pf}</td>
+    <td>${counts["Crítico"]||"–"}</td>
+    <td>${counts["Alto"]||"–"}</td>
+    <td>${counts["Médio"]||"–"}</td>
+    <td>${counts["Baixo"]||"–"}</td>
+    <td><span class="focal-pill ${pillClass(total)}">${total}</span></td>
+  `;
+  focalBody.appendChild(tr);
+});
+
+const totalRow = document.getElementById("focal-total");
+const totSev = {"Crítico":0,"Alto":0,"Médio":0,"Baixo":0};
+const totStat = {"andamento":0,"Criada":0,"execução":0,"Sem atualização":0};
+DATA.forEach(d=>{
+  totSev[d.severidade]++;
+  totStat[getStatusKey(d)]++;
+});
+totalRow.innerHTML = `<td>Total geral</td><td>${totSev["Crítico"]}</td><td>${totSev["Alto"]}</td><td>${totSev["Médio"]}</td><td>${totSev["Baixo"]}</td><td>${DATA.length}</td>`;
+
+const focalSorted = [...focalTotals].sort((a,b)=>a.total-b.total);
+// Gráfico de status por ponto focal (barras empilhadas horizontais)
+barChartHStacked("chartFocalStatus",
+  focalSorted.map(f=>f.pf),
+  [
+    { label:"Em andamento",  values: focalSorted.map(f=>f.statCounts["andamento"]),    color:"#1E8E5A" },
+    { label:"Criada",        values: focalSorted.map(f=>f.statCounts["Criada"]),       color:"#C9971C" },
+    { label:"Em execução",   values: focalSorted.map(f=>f.statCounts["execução"]),     color:"#2980B9" },
+    { label:"Sem atualiz.",  values: focalSorted.map(f=>f.statCounts["Sem atualização"]), color:"#D0D8DC" },
+  ]
+);
+
+// ---------- Resumo por apontamento ----------
+const resumoBody = document.getElementById("resumo-body");
+const apontamentosOrdenados = [...apontamentosUnicos].sort((a,b)=>{
+  const ia = DATA.find(d=>d.apontamento_id===a), ib = DATA.find(d=>d.apontamento_id===b);
+  return SEV_ORDER[ia.severidade] - SEV_ORDER[ib.severidade];
+});
+apontamentosOrdenados.forEach(id=>{
+  const rows = DATA.filter(d=>d.apontamento_id===id);
+  const item = rows[0];
+  const qtdAcoes = rows.length;
+  const qtdAtualizado = rows.filter(r=>r.comentario).length;
+  const pct = Math.round(100*qtdAtualizado/qtdAcoes);
+  const minDias = Math.min(...rows.map(r=>r.dias));
+  const minRow = rows.find(r=>r.dias===minDias);
+  const num = item.apontamento_titulo.split(".")[0];
+  const titulo = item.apontamento_titulo.replace(/^\d+\.\s*/,"");
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${num}</td>
+    <td>${titulo}</td>
+    <td><span class="badge sev-${item.severidade}">${item.severidade}</span></td>
+    <td>${qtdAcoes}</td>
+    <td><div class="pct-cell"><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div><span>${pct}%</span></div></td>
+    <td>${fmtDate(minRow.prazo_previsto)}</td>
+  `;
+  resumoBody.appendChild(tr);
+});
+
+// ---------- Filtros dropdown ----------
+const selApontamento = document.getElementById("f-apontamento");
+apontamentosOrdenados.forEach(id=>{
+  const item = DATA.find(d=>d.apontamento_id===id);
+  const opt = document.createElement("option");
+  opt.value = id; opt.textContent = item.apontamento_titulo;
+  selApontamento.appendChild(opt);
+});
+const selSeveridade = document.getElementById("f-severidade");
+["Crítico","Alto","Médio","Baixo"].forEach(s=>{
+  const opt = document.createElement("option"); opt.value=s; opt.textContent=s; selSeveridade.appendChild(opt);
+});
+const selStatus = document.getElementById("f-status");
+["Em andamento","Criada, aguardando publicação","Em execução (ver nota)","Sem atualização"].forEach(s=>{
+  const opt = document.createElement("option"); opt.value=s; opt.textContent=s; selStatus.appendChild(opt);
+});
+
+const selFocal = document.getElementById("f-focal");
+const focaisPresentes = [...new Set(DATA.map(d=>d.ponto_focal))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+focaisPresentes.forEach(pf=>{
+  const opt = document.createElement("option"); opt.value=pf; opt.textContent=pf; selFocal.appendChild(opt);
+});
+
+const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const selMes = document.getElementById("f-mes");
+const mesesPresentes = [...new Set(DATA.filter(d=>d.prazo_previsto).map(d=> parseDate(d.prazo_previsto).getMonth()))].sort((a,b)=>a-b);
+mesesPresentes.forEach(m=>{
+  const opt = document.createElement("option"); opt.value=m; opt.textContent=MESES[m]; selMes.appendChild(opt);
+});
+const selAno = document.getElementById("f-ano");
+const anosPresentes = [...new Set(DATA.filter(d=>d.prazo_previsto).map(d=> parseDate(d.prazo_previsto).getFullYear()))].sort((a,b)=>a-b);
+anosPresentes.forEach(a=>{
+  const opt = document.createElement("option"); opt.value=a; opt.textContent=a; selAno.appendChild(opt);
+});
+
+// ---------- Plano de ação cards ----------
+const planoList = document.getElementById("plano-list");
+const resultCount = document.getElementById("result-count");
+
+function faixaClass(slug){ return "faixa-"+slug; }
+
+function renderPlano(){
+  const q = document.getElementById("f-search").value.trim().toLowerCase();
+  const fa = selApontamento.value, fs = selSeveridade.value, fst = selStatus.value, ff = selFocal.value;
+  const fm = selMes.value, fy = selAno.value;
+  const filtered = DATA.filter(d=>{
+    if(fa && d.apontamento_id!==fa) return false;
+    if(fs && d.severidade!==fs) return false;
+    if(fst && d.status.label!==fst) return false;
+    if(ff && d.ponto_focal!==ff) return false;
+    if(fm !== "" || fy !== ""){
+      const dt = parseDate(d.prazo_previsto);
+      if(!dt) return false;
+      if(fm !== "" && dt.getMonth() !== Number(fm)) return false;
+      if(fy !== "" && dt.getFullYear() !== Number(fy)) return false;
+    }
+    if(q){
+      const hay = (d.acao_id+" "+d.acao_desc+" "+(d.entregavel||"")+" "+d.apontamento_titulo).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  resultCount.textContent = "Mostrando " + filtered.length + " de " + DATA.length + " ações";
+  planoList.innerHTML = "";
+  if(filtered.length===0){
+    planoList.innerHTML = '<div class="no-results">Nenhuma ação encontrada para esses filtros.</div>';
+    return;
+  }
+  filtered.forEach(d=>{
+    const card = document.createElement("div");
+    card.className = "acao-card";
+    card.innerHTML = `
+      <div class="acao-top">
+        <span class="acao-id">${d.acao_id}</span>
+        <span class="acao-titulo">${d.apontamento_titulo}</span>
+        <span class="badge sev-${d.severidade}">${d.severidade}</span>
+        <span class="badge ${faixaClass(d.faixaSlug)}">${d.faixa}${d.dias!==null ? " · "+d.dias+"d" : ""}</span>
+        <span class="badge ${d.status.cls}">${d.status.label}</span>
+      </div>
+      <div class="acao-desc">${d.acao_desc}</div>
+      ${d.entregavel ? `<div class="acao-entrega"><b>Entregável:</b> ${d.entregavel}</div>` : ""}
+      <div class="acao-bottom">
+        <span>Prazo: <b>${fmtDate(d.prazo_previsto)}</b></span>
+        <span>Ponto Focal: <b>${d.ponto_focal}</b></span>
+        <span>Gerente: <b>${d.gerente_resp}</b></span>
+        ${d.comentario ? `<span class="comment">"${d.comentario}"</span>` : ""}
+      </div>
+    `;
+    planoList.appendChild(card);
+  });
+}
+document.getElementById("f-search").addEventListener("input", renderPlano);
+selApontamento.addEventListener("change", renderPlano);
+selSeveridade.addEventListener("change", renderPlano);
+selStatus.addEventListener("change", renderPlano);
+selFocal.addEventListener("change", renderPlano);
+selMes.addEventListener("change", renderPlano);
+selAno.addEventListener("change", renderPlano);
+renderPlano();
+
+// =========================================================================
+// DRILL-DOWN
+// =========================================================================
+const ddOverlay = document.getElementById("dd-overlay");
+const ddTitle   = document.getElementById("dd-title");
+const ddCount   = document.getElementById("dd-count");
+const ddBody    = document.getElementById("dd-body");
+
+function openDrilldown(title, rows){
+  ddTitle.textContent = title;
+  ddCount.textContent = rows.length + (rows.length===1?" ação":" ações");
+  ddBody.innerHTML = "";
+  if(rows.length===0){
+    ddBody.innerHTML = '<div class="dd-empty">Nenhuma ação encontrada para este filtro.</div>';
+  } else {
+    rows.forEach(d=>{
+      const div = document.createElement("div");
+      div.className = "dd-card sev-"+d.severidade;
+      div.innerHTML = `
+        <div class="dd-top">
+          <span class="badge sev-${d.severidade}">${d.severidade}</span>
+          <span class="badge ${faixaClass(d.faixaSlug)}">${d.faixa} · ${d.dias}d</span>
+          <span class="badge ${d.status.cls}">${d.status.label}</span>
+          <span style="font-size:0.72rem;color:var(--muted);font-family:Consolas,monospace;">${d.acao_id}</span>
+        </div>
+        <div class="dd-desc">${d.acao_desc}</div>
+        ${d.entregavel ? `<div class="dd-entrega"><b>Entregável:</b> ${d.entregavel}</div>` : ""}
+        <div class="dd-meta">
+          <span><b>Apontamento:</b> ${d.apontamento_titulo}</span>
+          <span><b>Prazo:</b> ${fmtDate(d.prazo_previsto)}</span>
+          <span><b>Ponto focal:</b> ${d.ponto_focal}</span>
+          <span><b>Gerente:</b> ${d.gerente_resp}</span>
+          ${d.comentario ? `<span class="dd-comment">"${d.comentario}"</span>` : ""}
+        </div>
+      `;
+      ddBody.appendChild(div);
+    });
+  }
+  ddOverlay.classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeDrilldown(){
+  ddOverlay.classList.remove("open");
+  document.body.style.overflow="";
+}
+document.getElementById("dd-back").addEventListener("click", closeDrilldown);
+document.getElementById("dd-backdrop").addEventListener("click", closeDrilldown);
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeDrilldown(); });
+
+// ---------- Tornar gráficos clicáveis (adicionar onclick nos SVG) ----------
+function makeBarChartClickable(containerId, keys, labelFn){
+  const el = document.getElementById(containerId);
+  const svgEl = el.querySelector("svg");
+  if(!svgEl) return;
+  svgEl.classList.add("chart-clickable");
+  const rects = svgEl.querySelectorAll("rect");
+  rects.forEach((rect, i)=>{
+    if(i >= keys.length) return;
+    const key = keys[i];
+    rect.style.cursor = "pointer";
+    rect.addEventListener("click", ()=>{
+      const filtered = DATA.filter(d=> labelFn(d)===key);
+      openDrilldown(key, filtered);
+    });
+  });
+}
+function makeHBarChartClickable(containerId, labels, allRows){
+  const el = document.getElementById(containerId);
+  const svgEl = el.querySelector("svg");
+  if(!svgEl) return;
+  svgEl.classList.add("chart-clickable");
+  const rects = svgEl.querySelectorAll("rect");
+  rects.forEach((rect, i)=>{
+    const label = labels[i];
+    rect.style.cursor = "pointer";
+    rect.addEventListener("click", ()=>{
+      const filtered = DATA.filter(d=>d.ponto_focal===label);
+      openDrilldown("Ponto focal: "+label, filtered);
+    });
+  });
+}
+function makeDonutClickable(containerId, labelsMap){
+  const el = document.getElementById(containerId);
+  const svgEl = el.querySelector("svg");
+  if(!svgEl) return;
+  svgEl.classList.add("chart-clickable");
+  const circles = svgEl.querySelectorAll("circle");
+  circles.forEach((circle, i)=>{
+    const entry = labelsMap[i];
+    if(!entry) return;
+    circle.style.cursor = "pointer";
+    circle.addEventListener("click", ()=>{
+      const filtered = DATA.filter(d=>entry.test(d));
+      openDrilldown(entry.label, filtered);
+    });
+  });
+}
+
+// Gráfico severidade (por apontamento-level, aqui filtramos ações pela severidade do apontamento)
+makeBarChartClickable("chartSeveridade", sevLabels, d=>d.severidade);
+
+// Gráfico status
+makeDonutClickable("chartStatus", [
+  { label:"Com atualização", test:d=>!!d.comentario },
+  { label:"Sem atualização", test:d=>!d.comentario },
+]);
+
+// Gráfico faixa de prazo
+makeBarChartClickable("chartPrazo", faixaKeys, d=>d.faixa);
+
+// Gráfico pontos focais — stacked status chart abaixo
+
+// Gráfico status por ponto focal — cada segmento clicável filtra focal + status
+{
+  const el = document.getElementById("chartFocalStatus");
+  const svgEl = el?.querySelector("svg");
+  if(svgEl){
+    svgEl.classList.add("chart-clickable");
+    svgEl.querySelectorAll("rect").forEach(rect=>{
+      rect.style.cursor="pointer";
+      rect.addEventListener("click", ()=>{
+        // identifica linha (pf) pelo posicionamento y
+        const y = parseFloat(rect.getAttribute("y"))||0;
+        const idx = Math.floor((y - 8) / 30);
+        const pf = focalSorted[idx]?.pf;
+        if(!pf) return;
+        const fill = rect.getAttribute("fill");
+        // identifica série pela cor
+        const serLabels = {"#1E8E5A":"Em andamento","#C9971C":"Criada","#2980B9":"Em execução","#D0D8DC":"Sem atualização"};
+        const serKey = serLabels[fill];
+        const filtered = DATA.filter(d=>{
+          if(d.ponto_focal!==pf) return false;
+          const k = getStatusKey(d);
+          if(serKey==="Em andamento") return k==="andamento";
+          if(serKey==="Criada") return k==="Criada";
+          if(serKey==="Em execução") return k==="execução";
+          if(serKey==="Sem atualização") return k==="Sem atualização";
+          return true;
+        });
+        const title = serKey ? `${pf} — ${serKey}` : `Ponto focal: ${pf}`;
+        openDrilldown(title, filtered);
+      });
+    });
+  }
+}
+
+// ---------- Tabela Resumo por Apontamento — linhas clicáveis ----------
+document.querySelectorAll("#resumo-body tr").forEach(tr=>{
+  const cells = tr.querySelectorAll("td");
+  if(!cells.length) return;
+  const titulo = cells[1]?.textContent?.trim();
+  tr.setAttribute("data-click","1");
+  tr.addEventListener("click", ()=>{
+    const filtered = DATA.filter(d=>d.apontamento_titulo.includes(titulo.slice(0,20)));
+    openDrilldown("Apontamento: "+titulo, filtered);
+  });
+});
+
+// ---------- Tabela Pontos Focais — linhas clicáveis ----------
+document.querySelectorAll("#focal-body tr").forEach(tr=>{
+  const cell = tr.querySelector("td");
+  if(!cell) return;
+  const pf = cell.textContent.trim();
+  tr.setAttribute("data-click","1");
+  tr.addEventListener("click", ()=>{
+    const filtered = DATA.filter(d=>d.ponto_focal===pf);
+    openDrilldown("Ponto focal: "+pf, filtered);
+  });
+});
+
+// ---------- Cards de Vencimento — clicáveis ----------
+document.querySelectorAll(".venc-item").forEach(item=>{
+  item.style.cursor = "pointer";
+  item.addEventListener("click", ()=>{
+    const acao_id = item.querySelector(".meta")?.textContent?.match(/RTSK_\d+/)?.[0];
+    if(!acao_id) return;
+    const row = DATA.find(d=>d.acao_id===acao_id);
+    if(!row) return;
+    openDrilldown(row.apontamento_titulo, [row]);
+  });
+});
+
+// ---------- Tabela Resumo: colunas de % clicáveis (com vs sem atualização) ----------
+document.querySelectorAll("#resumo-body tr").forEach(tr=>{
+  const cells = tr.querySelectorAll("td");
+  if(cells.length < 6) return;
+  const titulo = cells[1]?.textContent?.trim();
+  // célula de % (index 4) já tem o hover da linha toda
+});
+
+// ---------- Navegação do menu (rolagem garantida + item ativo) ----------
+const navLinks = Array.from(document.querySelectorAll("nav .links .navlink"));
+const navSections = navLinks.map(a => document.getElementById(a.getAttribute("data-target"))).filter(Boolean);
+
+navLinks.forEach(a=>{
+  a.addEventListener("click", function(e){
+    e.preventDefault();
+    const id = a.getAttribute("data-target");
+    const target = document.getElementById(id);
+    if(target){ target.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  });
+});
+
+function highlightActiveNav(){
+  const probe = window.scrollY + 90;
+  let current = navSections[0];
+  navSections.forEach(sec=>{ if(sec.offsetTop <= probe) current = sec; });
+  navLinks.forEach(a=>{
+    a.classList.toggle("active", current && a.getAttribute("data-target") === current.id);
+  });
+}
+window.addEventListener("scroll", highlightActiveNav, { passive: true });
+highlightActiveNav();
+</script>
+</body>
+</html>
